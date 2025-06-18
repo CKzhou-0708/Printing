@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>安全认证系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #e0f7fa;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(16, 42, 67, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 
+                        inset 0 0 15px rgba(0, 150, 255, 0.2);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.5s ease;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 150, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 15s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 42px;
+            color: #4fc3f7;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px rgba(79, 195, 247, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #90a4ae;
+            margin-top: 10px;
+        }
+        
+        .code-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0 40px;
+        }
+        
+        .code-input {
+            width: 22%;
+            height: 70px;
+            background: rgba(10, 25, 47, 0.7);
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            border-radius: 12px;
+            color: #e0f7fa;
+            font-size: 32px;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+            caret-color: #4fc3f7;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .code-input:focus {
+            border-color: #4fc3f7;
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.5);
+            transform: translateY(-3px);
+        }
+        
+        .code-input.filled {
+            border-color: #00e676;
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.3);
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #00c853, #00e676);
+            color: #002f00;
+        }
+        
+        .cancel-btn {
+            background: linear-gradient(135deg, #ff3d00, #ff6d00);
+            color: #fff;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 13px;
+            color: #90a4ae;
+        }
+        
+        .footer a {
+            color: #4fc3f7;
+            text-decoration: none;
+        }
+        
+        .security-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+        
+        .security-note i {
+            color: #4fc3f7;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        /* 成功页面样式 */
+        .success-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #00c853, #00e676);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+        
+        .success-icon i {
+            font-size: 50px;
+            color: white;
+        }
+        
+        .success-title {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: #00e676;
+            text-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
+        }
+        
+        .success-message {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #e0f7fa;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00c853, #00e676);
+            width: 0%;
+            transition: width 3s ease;
+            border-radius: 10px;
+        }
+        
+        .status-message {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #90a4ae;
+        }
+        
+        /* 动画效果 */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(0, 230, 118, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px 20px;
+            }
+            
+            .code-input {
+                height: 60px;
+                font-size: 28px;
+            }
+            
+            .btn {
+                padding: 14px;
+            }
+            
+            .success-title {
+                font-size: 24px;
+            }
+            
+            .success-message {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 350px) {
+            .code-input {
+                height: 50px;
+                font-size: 24px;
+            }
+        }
+        
+        /* 打印动画 */
+        .printer-animation {
+            margin: 30px 0;
+            position: relative;
+            width: 120px;
+            height: 100px;
+        }
+        
+        .printer {
+            position: relative;
+            width: 100px;
+            height: 60px;
+            background: #2c3e50;
+            border-radius: 8px;
+            margin: 0 auto;
+        }
+        
+        .printer-top {
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            width: 60px;
+            height: 10px;
+            background: #34495e;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .paper {
+            position: absolute;
+            bottom: 10px;
+            left: 20px;
+            width: 60px;
+            height: 0;
+            background: #ecf0f1;
+            overflow: hidden;
+            border-radius: 2px;
+            animation: print 2s infinite;
+        }
+        
+        .paper::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 50px;
+            height: 8px;
+            background: #bdc3c7;
+            border-radius: 2px;
+        }
+        
+        .paper::after {
+            content: '';
+            position: absolute;
+            top: 18px;
+            left: 5px;
+            width: 30px;
+            height: 8px;
+            background: #bdc3c7;
+            border-radius: 2px;
+        }
+        
+        @keyframes print {
+            0% { height: 0; }
+            50% { height: 50px; }
+            100% { height: 50px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 验证码输入页面 -->
+        <div class="input-container">
+            <div class="header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h1>请输入您收到的认证码</h1>
+                <p class="subtitle">验证码已发送至您的手机，15分钟内有效</p>
+            </div>
+            
+            <div class="code-container">
+                <input type="tel" class="code-input" maxlength="1" inputmode="numeric" autofocus>
+                <input type="tel" class="code-input" maxlength="1" inputmode="numeric">
+                <input type="tel" class="code-input" maxlength="1" inputmode="numeric">
+                <input type="tel" class="code-input" maxlength="1" inputmode="numeric">
+            </div>
+            
+            <div class="security-note">
+                <i class="fas fa-lock"></i>
+                <span>您的信息安全已通过256位加密保护</span>
+            </div>
+            
+            <div class="buttons">
+                <button class="btn submit-btn">提交验证</button>
+                <button class="btn cancel-btn">取消</button>
+            </div>
+            
+            <div class="footer">
+                <p>遇到问题？<a href="#">重新发送验证码</a></p>
+                <p>© 2025 轩智文印系统 | 版本 2.0</p>
+            </div>
+        </div>
+        
+        <!-- 认证成功页面 -->
+        <div class="success-container">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2 class="success-title">认证成功</h2>
+            <p class="success-message">作业打印中，请稍候...</p>
+            
+            <div class="printer-animation">
+                <div class="printer">
+                    <div class="printer-top"></div>
+                    <div class="paper"></div>
+                </div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <p class="status-message">正在连接打印机，请勿关闭页面...</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('.code-input');
+            const submitBtn = document.querySelector('.submit-btn');
+            const cancelBtn = document.querySelector('.cancel-btn');
+            const inputContainer = document.querySelector('.input-container');
+            const successContainer = document.querySelector('.success-container');
+            const progressBar = document.getElementById('progressBar');
+            
+            // 自动聚焦到下一个输入框
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', function() {
+                    if (this.value.length === 1) {
+                        this.classList.add('filled');
+                        if (index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        }
+                    } else {
+                        this.classList.remove('filled');
+                    }
+                });
+                
+                // 处理删除键
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && this.value === '') {
+                        if (index > 0) {
+                            inputs[index - 1].focus();
+                        }
+                    }
+                });
+            });
+            
+            // 提交按钮点击事件
+            submitBtn.addEventListener('click', function() {
+                let code = '';
+                inputs.forEach(input => {
+                    code += input.value;
+                });
+                
+                if (code.length === 4) {
+                    // 显示加载动画
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 验证中...';
+                    submitBtn.disabled = true;
+                    
+                    // 模拟验证过程
+                    setTimeout(() => {
+                        // 切换到成功页面
+                        inputContainer.style.display = 'none';
+                        successContainer.style.display = 'flex';
+                        
+                        // 启动进度条动画
+                        setTimeout(() => {
+                            progressBar.style.width = '100%';
+                        }, 300);
+                    }, 1500);
+                } else {
+                    // 输入不完整时的动画
+                    inputs.forEach(input => {
+                        if (!input.value) {
+                            input.style.borderColor = '#ff3d00';
+                            input.style.boxShadow = '0 0 10px rgba(255, 61, 0, 0.5)';
+                            
+                            setTimeout(() => {
+                                input.style.borderColor = '';
+                                input.style.boxShadow = '';
+                            }, 1000);
+                        }
+                    });
+                }
+            });
+            
+            // 取消按钮点击事件
+            cancelBtn.addEventListener('click', function() {
+                if (confirm('确定要取消验证吗？')) {
+                    // 清空输入框
+                    inputs.forEach(input => {
+                        input.value = '';
+                        input.classList.remove('filled');
+                    });
+                    
+                    // 重新聚焦到第一个输入框
+                    inputs[0].focus();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
